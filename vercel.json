@@ -1,0 +1,39 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "functions": {
+    "api/router.js": {
+      "includeFiles": "**/*.html"
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/auth/(.*)",
+      "dest": "/api/router?route=api/auth/$1"
+    },
+    {
+      "src": "/api/data/(.*)",
+      "dest": "/api/router?route=api/data/$1"
+    },
+    {
+      "src": "/login/?",
+      "dest": "/api/router?route=login"
+    },
+    {
+      "src": "/health/?",
+      "dest": "/api/router?route=health"
+    },
+    {
+      "src": "/index\\.html",
+      "dest": "/api/router?route=index.html"
+    },
+    {
+      "src": "/?",
+      "dest": "/api/router?route=app"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/router?route=404"
+    }
+  ]
+}

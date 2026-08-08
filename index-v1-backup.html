@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Daily Report - Report New Depo</title>
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --line:#1b1f24;
+      --muted:#677381;
+      --blue:#dceef9;
+      --blue-2:#c9eaf7;
+      --green:#dff1d6;
+      --yellow:#fff500;
+      --accent:#1677ff;
+      --accent-dark:#0e5fc7;
+      --danger:#c62828;
+      --shadow:0 14px 32px rgba(21,40,60,.10);
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color:#101418;
+      background:var(--bg);
+    }
+    button,input,select,textarea{font:inherit}
+    .app{min-height:100vh;display:grid;grid-template-columns:230px 1fr}
+    .sidebar{
+      background:#101827;color:#fff;padding:24px 18px;position:sticky;top:0;height:100vh;
+    }
+    .brand{font-size:20px;font-weight:900;letter-spacing:.4px;margin-bottom:8px}
+    .brand-sub{font-size:12px;color:#9fb0c2;line-height:1.5;margin-bottom:28px}
+    .nav-title{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#7f93a8;margin:18px 10px 8px}
+    .nav-btn{width:100%;border:0;border-radius:10px;padding:12px 13px;text-align:left;background:transparent;color:#c7d2de;cursor:pointer;font-weight:700}
+    .nav-btn.active{background:#1c2a40;color:#fff;box-shadow:inset 3px 0 0 #45a3ff}
+    .nav-btn.disabled{opacity:.42;cursor:not-allowed}
+    .main{padding:26px;min-width:0}
+    .topbar{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}
+    .title h1{font-size:27px;line-height:1.15;margin:0 0 6px}
+    .title p{margin:0;color:var(--muted);font-size:14px}
+    .top-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .btn{border:1px solid #d5dde6;background:#fff;color:#17202a;border-radius:9px;padding:9px 12px;font-weight:750;cursor:pointer}
+    .btn:hover{border-color:#aeb9c6}
+    .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .btn.primary:hover{background:var(--accent-dark)}
+    .btn.danger{color:var(--danger)}
+    .panel{background:var(--card);border:1px solid #e5eaf0;border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:18px}
+    .controls{display:grid;grid-template-columns:repeat(6,minmax(130px,1fr));gap:12px;align-items:end}
+    .field label{display:block;font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.5px;color:#576473;margin-bottom:6px}
+    .field input,.field select{width:100%;border:1px solid #cfd8e3;border-radius:8px;padding:9px 10px;background:#fff;outline:none}
+    .field input:focus,.field select:focus{border-color:#70abf6;box-shadow:0 0 0 3px rgba(22,119,255,.10)}
+    .inline-check{display:flex;align-items:center;gap:8px;min-height:40px;font-size:13px;font-weight:700;color:#465362}
+    .inline-check input{width:16px;height:16px}
+    .help{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.55}
+    .table-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;border:1px solid #dfe5eb}
+    .sheet-wrap{overflow:auto;padding:8px;background:#fff}
+    table.sheet{width:100%;min-width:1000px;border-collapse:collapse;table-layout:fixed;border:2px solid var(--line);font-size:13px}
+    .sheet th,.sheet td{border:2px solid var(--line);padding:6px 7px;text-align:center;vertical-align:middle;height:36px}
+    .sheet .report-title{background:var(--green);font-size:18px;font-weight:900;letter-spacing:.2px}
+    .sheet .aset{background:var(--blue-2);font-weight:900;width:82px}
+    .sheet .date-head{background:#e9f4fb;font-weight:800}
+    .sheet .label-head{background:var(--blue);font-size:11px;font-weight:900}
+    .sheet .label-head.yellow{background:var(--yellow)}
+    .sheet .name-cell input,.sheet .num-cell input{width:100%;border:0;background:transparent;text-align:center;font-weight:700;outline:none;padding:3px}
+    .sheet .name-cell input{text-align:left}
+    .sheet .num-cell input[type=number]{appearance:textfield}
+    .sheet .calculated{background:#fbfcfe;font-weight:850}
+    .sheet .total-row td{background:var(--yellow);font-weight:900}
+    .sheet .total-label{text-align:center}
+    .row-actions{display:flex;gap:4px;justify-content:center}
+    .icon-btn{border:0;background:#eef2f6;border-radius:6px;width:26px;height:26px;cursor:pointer;font-weight:900;color:#536273}
+    .icon-btn:hover{background:#dfe6ee}
+    .empty-state{padding:34px;text-align:center;color:#73808f}
+    .summary-grid{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:12px;margin:16px 0 0}
+    .summary{border:1px solid #e0e6ed;border-radius:10px;padding:12px;background:#fafcff}
+    .summary span{font-size:11px;color:#647282;text-transform:uppercase;font-weight:850;letter-spacing:.45px}
+    .summary strong{display:block;font-size:22px;margin-top:4px}
+    .badge{display:inline-flex;align-items:center;gap:6px;background:#eef6ff;color:#0d66ce;border:1px solid #cfe6ff;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:800}
+    .footer-note{font-size:12px;color:#6d7884;padding:12px 2px 24px}
+    .toast{position:fixed;right:22px;bottom:22px;background:#17202a;color:#fff;padding:11px 14px;border-radius:9px;box-shadow:0 10px 30px rgba(0,0,0,.25);font-size:13px;font-weight:700;opacity:0;transform:translateY(8px);pointer-events:none;transition:.2s;z-index:99}
+    .toast.show{opacity:1;transform:translateY(0)}
+    @media (max-width:1100px){.controls{grid-template-columns:repeat(3,1fr)}.summary-grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:760px){.app{display:block}.sidebar{position:relative;height:auto;padding:14px}.brand-sub,.nav-title{display:none}.sidebar .nav-btn{display:inline-block;width:auto;margin-top:8px}.main{padding:14px}.topbar{display:block}.top-actions{justify-content:flex-start;margin-top:12px}.controls{grid-template-columns:1fr 1fr}.summary-grid{grid-template-columns:1fr 1fr}}
+    @media print{
+      body{background:#fff}.sidebar,.top-actions,.panel,.summary-grid,.footer-note,.row-actions{display:none!important}.app{display:block}.main{padding:0}.table-card{box-shadow:none;border:0}.sheet-wrap{padding:0}table.sheet{font-size:10px;min-width:0}.sheet th,.sheet td{height:28px;padding:3px}.sheet .report-title{font-size:14px}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">DAILY REPORT</div>
+    <div class="brand-sub">Monitoring harian dengan perhitungan target otomatis.</div>
+    <div class="nav-title">Kategori</div>
+    <button class="nav-btn active">REPORT NEW DEPO</button>
+    <button class="nav-btn disabled" title="Dapat ditambahkan pada tahap berikutnya">+ Kategori berikutnya</button>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="title">
+        <h1>Report New Depo</h1>
+        <p>Kelola NDP, nominal, sisa target, dan target harian dalam satu tabel.</p>
+      </div>
+      <div class="top-actions">
+        <button class="btn" id="saveBtn">Simpan</button>
+        <button class="btn" id="printBtn">Cetak / PDF</button>
+        <button class="btn danger" id="resetBtn">Reset Data</button>
+      </div>
+    </div>
+
+    <section class="panel">
+      <div class="controls">
+        <div class="field">
+          <label>Bulan</label>
+          <select id="monthSelect"></select>
+        </div>
+        <div class="field">
+          <label>Tahun</label>
+          <input id="yearInput" type="number" min="2020" max="2100" />
+        </div>
+        <div class="field">
+          <label>Tanggal laporan</label>
+          <input id="reportDate" type="date" />
+        </div>
+        <div class="field">
+          <label>Jumlah nama</label>
+          <input id="rowCount" type="number" min="1" max="200" value="1" />
+        </div>
+        <div class="field">
+          <label>Target NDP default</label>
+          <input id="defaultTarget" type="number" min="0" step="1" value="100" />
+        </div>
+        <button class="btn primary" id="applyBtn">Terapkan</button>
+      </div>
+      <div class="controls" style="margin-top:12px;grid-template-columns:220px 180px 1fr">
+        <div class="field">
+          <label>Perhitungan hari kerja</label>
+          <select id="workdayMode">
+            <option value="auto">Otomatis Senin–Jumat</option>
+            <option value="manual">Manual</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Sisa hari kerja</label>
+          <input id="manualWorkdays" type="number" min="0" max="31" value="20" disabled />
+        </div>
+        <div class="inline-check">
+          <input type="checkbox" id="includeReportDate" />
+          <label for="includeReportDate">Hitung tanggal laporan sebagai hari kerja yang masih tersisa</label>
+        </div>
+      </div>
+      <div class="help">
+        Rumus: <b>Sisa Target NDP = max(Target NDP − NDP, 0)</b>. Target per hari = <b>Sisa Target ÷ Sisa Hari Kerja</b>, lalu dibulatkan ke bilangan bulat terdekat. Data disimpan per bulan dan tahun di browser ini.
+      </div>
+    </section>
+
+    <section class="table-card">
+      <div class="sheet-wrap">
+        <table class="sheet" id="reportTable">
+          <colgroup>
+            <col style="width:86px"><col style="width:145px"><col style="width:90px"><col style="width:125px"><col style="width:100px"><col style="width:100px"><col style="width:110px"><col style="width:120px"><col style="width:60px">
+          </colgroup>
+          <thead>
+            <tr>
+              <th class="aset" rowspan="3">ASET</th>
+              <th class="report-title" colspan="8">REPORT NEW DEPO</th>
+            </tr>
+            <tr>
+              <th class="date-head" id="startDateHead">01 Maret 2026</th>
+              <th class="date-head">s/d</th>
+              <th class="date-head" id="endDateHead">31 Maret 2026</th>
+              <th class="label-head" rowspan="2">TARGET NDP</th>
+              <th class="label-head" rowspan="2">SISA HARI KERJA</th>
+              <th class="label-head" rowspan="2">SISA TARGET NDP</th>
+              <th class="label-head" rowspan="2">TARGET PERHARI</th>
+              <th class="label-head" rowspan="2">AKSI</th>
+            </tr>
+            <tr>
+              <th class="label-head yellow">NAMA</th>
+              <th class="label-head yellow">NDP</th>
+              <th class="label-head yellow">NOMINAL</th>
+            </tr>
+          </thead>
+          <tbody id="rowsBody"></tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td></td>
+              <td class="total-label">Total</td>
+              <td id="totalNdp">0</td>
+              <td id="totalNominal">0</td>
+              <td id="totalTarget">0</td>
+              <td id="totalWorkdays">-</td>
+              <td id="totalRemaining">0</td>
+              <td id="totalDaily">0</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+
+    <div class="summary-grid">
+      <div class="summary"><span>Total NDP</span><strong id="sumNdp">0</strong></div>
+      <div class="summary"><span>Total Nominal</span><strong id="sumNominal">Rp 0</strong></div>
+      <div class="summary"><span>Total Sisa Target</span><strong id="sumRemaining">0</strong></div>
+      <div class="summary"><span>Periode</span><strong id="sumPeriod" style="font-size:16px">-</strong></div>
+    </div>
+
+    <div class="footer-note"><span class="badge">● Auto-save aktif</span> &nbsp; Perubahan input otomatis tersimpan untuk periode yang dipilih.</div>
+  </main>
+</div>
+<div class="toast" id="toast">Tersimpan</div>
+
+<script>
+(() => {
+  const months = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+  const $ = (id) => document.getElementById(id);
+  const monthSelect = $("monthSelect");
+  const yearInput = $("yearInput");
+  const reportDate = $("reportDate");
+  const rowCount = $("rowCount");
+  const defaultTarget = $("defaultTarget");
+  const workdayMode = $("workdayMode");
+  const manualWorkdays = $("manualWorkdays");
+  const includeReportDate = $("includeReportDate");
+  const rowsBody = $("rowsBody");
+
+  months.forEach((m,i) => {
+    const o=document.createElement('option'); o.value=i; o.textContent=m; monthSelect.appendChild(o);
+  });
+
+  const now = new Date();
+  monthSelect.value = now.getMonth();
+  yearInput.value = now.getFullYear();
+
+  const pad = n => String(n).padStart(2,'0');
+  const toDateInput = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+
+  function monthKey(){ return `daily-report-new-depo:${yearInput.value}-${pad(Number(monthSelect.value)+1)}`; }
+  function daysInMonth(y,m){ return new Date(y,m+1,0).getDate(); }
+  function clampReportDate(){
+    const y=+yearInput.value, m=+monthSelect.value, last=daysInMonth(y,m);
+    let d = new Date(reportDate.value + 'T00:00:00');
+    if (!reportDate.value || d.getFullYear()!==y || d.getMonth()!==m){
+      let day = (now.getFullYear()===y && now.getMonth()===m) ? Math.min(now.getDate(),last) : 1;
+      reportDate.value = `${y}-${pad(m+1)}-${pad(day)}`;
+    }
+    reportDate.min = `${y}-${pad(m+1)}-01`;
+    reportDate.max = `${y}-${pad(m+1)}-${pad(last)}`;
+  }
+  function remainingWorkdays(){
+    if(workdayMode.value==='manual') return Math.max(0, Number(manualWorkdays.value)||0);
+    if(!reportDate.value) return 0;
+    const y=+yearInput.value, m=+monthSelect.value, last=daysInMonth(y,m);
+    const rd=new Date(reportDate.value+'T00:00:00');
+    let start=rd.getDate() + (includeReportDate.checked ? 0 : 1), count=0;
+    for(let day=start; day<=last; day++){
+      const dow=new Date(y,m,day).getDay();
+      if(dow!==0 && dow!==6) count++;
+    }
+    return count;
+  }
+  function money(n){
+    return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(n)||0);
+  }
+  function plainNumber(n){ return new Intl.NumberFormat('id-ID',{maximumFractionDigits:0}).format(Number(n)||0); }
+  function toast(msg='Tersimpan'){
+    const t=$("toast"); t.textContent=msg; t.classList.add('show'); clearTimeout(window.__toast); window.__toast=setTimeout(()=>t.classList.remove('show'),1200);
+  }
+
+  function rowTemplate(data={}){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="calculated"></td>
+      <td class="name-cell"><input class="name" type="text" placeholder="Nama" value="${escapeHtml(data.name||'')}"></td>
+      <td class="num-cell"><input class="ndp" type="number" min="0" step="1" value="${num(data.ndp,0)}"></td>
+      <td class="num-cell"><input class="nominal" type="number" min="0" step="1000" value="${num(data.nominal,0)}"></td>
+      <td class="num-cell"><input class="target" type="number" min="0" step="1" value="${num(data.target, Number(defaultTarget.value)||0)}"></td>
+      <td class="calculated workdays">0</td>
+      <td class="calculated remaining">0</td>
+      <td class="calculated daily">0</td>
+      <td><div class="row-actions"><button class="icon-btn dup" title="Duplikat">+</button><button class="icon-btn del" title="Hapus">×</button></div></td>`;
+    tr.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',()=>{recalc(); save(false);}));
+    tr.querySelector('.del').addEventListener('click',()=>{ if(rowsBody.children.length>1){tr.remove(); rowCount.value=rowsBody.children.length; recalc(); save(false);} });
+    tr.querySelector('.dup').addEventListener('click',()=>{
+      const d=serializeRow(tr); const nr=rowTemplate(d); tr.after(nr); rowCount.value=rowsBody.children.length; recalc(); save(false);
+    });
+    return tr;
+  }
+  function escapeHtml(s){ return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+  function num(v,fallback=0){ return Number.isFinite(Number(v)) ? Number(v) : fallback; }
+  function serializeRow(tr){
+    return {name:tr.querySelector('.name').value,ndp:+tr.querySelector('.ndp').value||0,nominal:+tr.querySelector('.nominal').value||0,target:+tr.querySelector('.target').value||0};
+  }
+  function ensureRows(count, applyDefault=false){
+    count=Math.max(1,Math.min(200,Number(count)||1));
+    while(rowsBody.children.length<count) rowsBody.appendChild(rowTemplate({target:Number(defaultTarget.value)||0}));
+    while(rowsBody.children.length>count) rowsBody.lastElementChild.remove();
+    if(applyDefault){ rowsBody.querySelectorAll('.target').forEach(i=>i.value=Number(defaultTarget.value)||0); }
+    rowCount.value=count;
+    recalc();
+  }
+  function updateHeaders(){
+    const y=+yearInput.value,m=+monthSelect.value,last=daysInMonth(y,m);
+    $('startDateHead').textContent=`01 ${months[m]} ${y}`;
+    $('endDateHead').textContent=`${pad(last)} ${months[m]} ${y}`;
+    $('sumPeriod').textContent=`01–${pad(last)} ${months[m]} ${y}`;
+  }
+  function recalc(){
+    updateHeaders();
+    const wd=remainingWorkdays();
+    let ndpSum=0,nomSum=0,targetSum=0,remSum=0,dailySum=0;
+    [...rowsBody.children].forEach((tr,idx)=>{
+      tr.children[0].textContent=idx+1;
+      const ndp=+tr.querySelector('.ndp').value||0;
+      const nominal=+tr.querySelector('.nominal').value||0;
+      const target=+tr.querySelector('.target').value||0;
+      const remain=Math.max(target-ndp,0);
+      const daily=wd>0 ? Math.round(remain/wd) : 0;
+      tr.querySelector('.workdays').textContent=wd;
+      tr.querySelector('.remaining').textContent=plainNumber(remain);
+      tr.querySelector('.daily').textContent=plainNumber(daily);
+      ndpSum+=ndp;nomSum+=nominal;targetSum+=target;remSum+=remain;dailySum+=daily;
+    });
+    $('totalNdp').textContent=plainNumber(ndpSum);
+    $('totalNominal').textContent=plainNumber(nomSum);
+    $('totalTarget').textContent=plainNumber(targetSum);
+    $('totalWorkdays').textContent=wd;
+    $('totalRemaining').textContent=plainNumber(remSum);
+    $('totalDaily').textContent=plainNumber(dailySum);
+    $('sumNdp').textContent=plainNumber(ndpSum);
+    $('sumNominal').textContent=money(nomSum);
+    $('sumRemaining').textContent=plainNumber(remSum);
+  }
+  function save(showToast=true){
+    const data={
+      month:+monthSelect.value,year:+yearInput.value,reportDate:reportDate.value,rowCount:+rowCount.value,
+      defaultTarget:+defaultTarget.value||0,workdayMode:workdayMode.value,manualWorkdays:+manualWorkdays.value||0,
+      includeReportDate:includeReportDate.checked,rows:[...rowsBody.children].map(serializeRow)
+    };
+    localStorage.setItem(monthKey(),JSON.stringify(data));
+    if(showToast) toast();
+  }
+  function load(){
+    clampReportDate();
+    const raw=localStorage.getItem(monthKey());
+    rowsBody.innerHTML='';
+    if(raw){
+      try{
+        const d=JSON.parse(raw);
+        defaultTarget.value=num(d.defaultTarget,100);
+        workdayMode.value=d.workdayMode||'auto';
+        manualWorkdays.value=num(d.manualWorkdays,20);
+        includeReportDate.checked=!!d.includeReportDate;
+        if(d.reportDate) reportDate.value=d.reportDate;
+        clampReportDate();
+        (d.rows?.length?d.rows:[{}]).forEach(r=>rowsBody.appendChild(rowTemplate(r)));
+        rowCount.value=rowsBody.children.length;
+      }catch(e){ rowsBody.appendChild(rowTemplate({target:100})); rowCount.value=1; }
+    } else {
+      rowsBody.appendChild(rowTemplate({target:Number(defaultTarget.value)||100})); rowCount.value=1;
+    }
+    manualWorkdays.disabled=workdayMode.value!=='manual';
+    recalc();
+  }
+
+  $('applyBtn').addEventListener('click',()=>{ clampReportDate(); ensureRows(rowCount.value,true); save(); });
+  $('saveBtn').addEventListener('click',()=>save(true));
+  $('printBtn').addEventListener('click',()=>window.print());
+  $('resetBtn').addEventListener('click',()=>{
+    if(confirm('Hapus semua data REPORT NEW DEPO untuk periode ini?')){
+      localStorage.removeItem(monthKey()); load(); toast('Data direset');
+    }
+  });
+  monthSelect.addEventListener('change',()=>{clampReportDate();load();});
+  yearInput.addEventListener('change',()=>{clampReportDate();load();});
+  reportDate.addEventListener('change',()=>{clampReportDate();recalc();save(false);});
+  workdayMode.addEventListener('change',()=>{manualWorkdays.disabled=workdayMode.value!=='manual';recalc();save(false);});
+  manualWorkdays.addEventListener('input',()=>{recalc();save(false);});
+  includeReportDate.addEventListener('change',()=>{recalc();save(false);});
+  defaultTarget.addEventListener('change',()=>save(false));
+  rowCount.addEventListener('change',()=>{ensureRows(rowCount.value,false);save(false);});
+
+  clampReportDate();
+  load();
+})();
+</script>
+</body>
+</html>
