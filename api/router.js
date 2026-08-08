@@ -10,7 +10,35 @@ const SMTP_USER = process.env.SMTP_USER || 'mariohebat7@gmail.com';
 const SMTP_PASS = process.env.SMTP_PASS || '';
 const SESSION_SECRET = process.env.SESSION_SECRET || '';
 const OTP_PEPPER = process.env.OTP_PEPPER || SESSION_SECRET;
-const DATABASE_URL = process.env.POSTGRES_URL || process.env.STORAGE_POSTGRES_URL || process.env.DATABASE_URL || process.env.STORAGE_URL || '';
+const RAW_DATABASE_URL =
+  process.env.POSTGRES_URL ||
+  process.env.STORAGE_POSTGRES_URL ||
+  process.env.DATABASE_URL ||
+  process.env.STORAGE_URL ||
+  '';
+
+function normalizeDatabaseUrl(value) {
+  if (!value) return '';
+
+  try {
+    const url = new URL(value);
+
+    // Hapus parameter SSL dari URL agar konfigurasi `ssl`
+    // pada pg.Pool di bawah tidak ditimpa connection string.
+    url.searchParams.delete('sslmode');
+    url.searchParams.delete('sslcert');
+    url.searchParams.delete('sslkey');
+    url.searchParams.delete('sslrootcert');
+
+    return url.toString();
+  } catch {
+    return value
+      .replace(/([?&])sslmode=[^&]*&?/gi, '$1')
+      .replace(/[?&]$/, '');
+  }
+}
+
+const DATABASE_URL = normalizeDatabaseUrl(RAW_DATABASE_URL);
 
 const OTP_TTL_MS = 10 * 60 * 1000;
 const RESEND_DELAY_MS = 60 * 1000;
