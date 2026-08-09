@@ -466,16 +466,73 @@
         </div>
       </section>
       <section class="table-card">
-        <div class="sheet-wrap">
-          <table class="sheet result-sheet" id="resultsTable">
-            <colgroup><col style="width:90px"><col style="width:340px"><col style="width:220px"></colgroup>
-            <thead>
-              <tr><th class="result-title" colspan="3" id="resultsTitleHead">HASIL REPORT HARIAN</th></tr>
-              <tr><th class="result-head" id="resultsHeadNo">Nomor</th><th class="result-head" id="resultsHeadCategory">Nama Aset / Kategori</th><th class="result-head" id="resultsHeadTotal">Total Bersih</th></tr>
-            </thead>
-            <tbody id="resultsBody"></tbody>
-            <tfoot><tr class="result-total-row"><td colspan="2">TOTAL KESELURUHAN</td><td id="resultsGrandTotal">Rp 0</td></tr></tfoot>
-          </table>
+  <div class="sheet-wrap">
+    <table class="sheet result-sheet" id="resultsTable">
+
+      <colgroup>
+        <col style="width:80px">
+        <col style="width:160px">
+        <col style="width:200px">
+        <col style="width:100px">
+        <col style="width:150px">
+        <col style="width:120px">
+        <col style="width:160px">
+      </colgroup>
+
+      <thead>
+
+        <tr>
+          <th class="result-title" colspan="7" id="resultsTitleHead">
+            HASIL REPORT HARIAN
+          </th>
+        </tr>
+
+        <tr>
+          <th class="result-head">NO</th>
+          <th class="result-head">ASET</th>
+          <th class="result-head">NAMA TELE</th>
+          <th class="result-head">NDP</th>
+          <th class="result-head">NOMINAL</th>
+          <th class="result-head">TARGET NDP</th>
+          <th class="result-head">KETERANGAN</th>
+        </tr>
+
+      </thead>
+
+
+      <tbody id="resultsBody"></tbody>
+
+
+      <tfoot>
+        <tr class="result-total-row">
+
+          <td colspan="3">
+            TOTAL
+          </td>
+
+          <td id="resultsGrandNdp">
+            0
+          </td>
+
+          <td id="resultsGrandTotal">
+            Rp 0
+          </td>
+
+          <td id="resultsGrandTarget">
+            0
+          </td>
+
+          <td>
+            -
+          </td>
+
+        </tr>
+      </tfoot>
+
+
+    </table>
+  </div>
+</section>
           <div class="archive-empty hidden" id="resultsEmpty">Belum ada data REPORT HARIAN ASET pada tanggal ini.</div>
         </div>
       </section>
@@ -955,23 +1012,223 @@
   }
 
   function calculateResults(date){
-    const rows=dailyRows(date), set=validAnnulSet(date), groups=new Map();let annulled=0;
-    // Daftarkan seluruh aset/kategori yang memang ada di report harian agar kategori tetap tampil meski hasil bersihnya 0.
-    rows.forEach(r=>{const cat=upper(String(r.category||'TANPA KATEGORI').trim()||'TANPA KATEGORI');if(!groups.has(cat))groups.set(cat,0)});
-    rows.forEach(r=>{const cat=upper(String(r.category||'TANPA KATEGORI').trim()||'TANPA KATEGORI');if(isAnnulled(r,set)){annulled++;return;}groups.set(cat,(groups.get(cat)||0)+(Number(r.nominal)||0))});
-    const items=[...groups.entries()].map(([name,total])=>({name:upper(name),total}));
-    return {items,rawCount:rows.length,annulled,grand:items.reduce((a,x)=>a+x.total,0)};
-  }
+
+  const rows = dailyRows(date);
+  const annulSet = validAnnulSet(date);
+
+  const groups = new Map();
+
+  let annulled = 0;
+
+
+  rows.forEach(r=>{
+
+    const name = upper(
+      String(r.tele || r.name || 'TANPA NAMA')
+      .trim()
+    );
+
+
+    const member = upper(
+      String(r.member || '')
+      .trim()
+    );
+
+
+    // cek transaksi yang sudah dianulir
+    const annulKey = `${name}|${member}`;
+
+    if(annulSet.has(annulKey)){
+      annulled++;
+      return;
+    }
+
+
+    if(!groups.has(name)){
+
+      groups.set(name,{
+    name:name,
+    ndp:0,
+    nominal:0,
+    target:Number(localStorage.getItem('TARGET_'+name)) || 100
+});
+
+    }
+
+
+    const item = groups.get(name);
+
+
+    // jumlah transaksi
+    item.ndp += 1;
+
+
+    // total nominal
+    item.nominal += Number(r.nominal || 0);
+
+
+  });
+
+
+
+  const items=[...groups.values()].map(x=>({
+
+    asset:
+      resultSettings.title || 'HASIL REPORT HARIAN',
+
+
+    name:
+      x.name,
+
+
+    ndp:
+      x.ndp,
+
+
+    nominal:
+      x.nominal,
+
+
+    target:
+      x.target,
+
+
+    status:
+      x.ndp >= x.target
+      ? 'TARGET'
+      : 'TIDAK TARGET'
+
+  }));
+
+
+
+  return {
+
+    items,
+
+    rowCount:
+      rows.length,
+
+
+    annulled,
+
+
+    grand:
+      items.reduce(
+        (a,x)=>a+x.nominal,
+        0
+      ),
+
+
+    grandNdp:
+      items.reduce(
+        (a,x)=>a+x.ndp,
+        0
+      ),
+
+
+    grandTarget:
+      items.reduce(
+        (a,x)=>a+x.target,
+        0
+      )
+
+  };
+
+}
   function renderResults(){
-    const date=currentResultDate(), calc=calculateResults(date), sort=$('resultsSort')?.value||'name-asc', q=upper($('resultsSearch')?.value||'').trim(), cat=$('resultsCategoryFilter')?.value||'';
-    $('resultsTitleHead').textContent=resultSettings.title;$('resultsPageTitle').textContent=resultSettings.title;$('navResultsLabel').textContent=resultSettings.menuName;
-    $('resultsHeadNo').textContent=resultSettings.columns.no;$('resultsHeadCategory').textContent=resultSettings.columns.category;$('resultsHeadTotal').textContent=resultSettings.columns.total;
-    const catSel=$('resultsCategoryFilter'),oldCat=catSel.value;catSel.innerHTML='<option value="">SEMUA ASET / KATEGORI</option>'+calc.items.slice().sort((a,b)=>natural.compare(a.name,b.name)).map(x=>`<option value="${esc(x.name)}">${esc(x.name)}</option>`).join('');if([...catSel.options].some(o=>o.value===oldCat))catSel.value=oldCat;
-    let items=calc.items.filter(x=>(!catSel.value||x.name===catSel.value)&&(!q||x.name.includes(q)));items.sort((a,b)=>{if(sort==='name-desc')return natural.compare(b.name,a.name);if(sort==='total-desc')return b.total-a.total||natural.compare(a.name,b.name);if(sort==='total-asc')return a.total-b.total||natural.compare(a.name,b.name);return natural.compare(a.name,b.name)});
-    $('resultsBody').innerHTML=items.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.name)}</td><td>${money(x.total)}</td></tr>`).join('');
-    $('resultsGrandTotal').textContent=money(calc.grand);$('resultsCategoryCount').textContent=items.length;$('resultsRawCount').textContent=calc.rawCount;$('resultsAnnulCount').textContent=calc.annulled;$('resultsNetSummary').textContent=money(calc.grand);$('resultsEmpty').classList.toggle('hidden',calc.rawCount>0&&items.length>0);
-    if($('annulDate').value===date)renderAnnulSummary();
-  }
+
+  const date=currentResultDate(),
+        calc=calculateResults(date),
+        sort=$('resultsSort').value||'name';
+
+  $('resultsTitleHead').textContent=resultSettings.title;
+  $('resultsPageTitle').textContent=resultSettings.title;
+
+  $('#resultsHeadNo').textContent='NO';
+
+$('#resultsHeadAsset').textContent='ASET';
+
+$('#resultsHeadName').textContent='NAMA TELE';
+
+$('#resultsHeadNdp').textContent='NDP';
+
+$('#resultsHeadNominal').textContent='NOMINAL';
+
+$('#resultsHeadTarget').textContent='TARGET NDP';
+
+$('#resultsHeadStatus').textContent='KETERANGAN';
+
+  const catSel=$('resultsCategoryFilter'),
+        oldCat=catSel.value;
+
+  catSel.innerHTML=...
+  
+  let items = calc.items.filter(x=>{
+  return !catSel.value || x.name === catSel.value;
+});
+
+
+$('#resultsBody').innerHTML = items.map((x,i)=>{
+
+  const status =
+    Number(x.ndp) >= Number(x.target)
+    ? 'TARGET'
+    : 'TIDAK TARGET';
+
+
+  return `
+  <tr>
+
+    <td>${i+1}</td>
+
+    <td>${x.asset || resultSettings.title}</td>
+
+    <td>${x.name}</td>
+
+    <td>${x.ndp}</td>
+
+    <td>${money(x.nominal)}</td>
+
+    <td>
+      <input 
+        class="target-input"
+        data-name="${x.name}"
+        value="${x.target || 0}"
+        type="number"
+      >
+    </td>
+
+    <td>
+      ${status}
+    </td>
+
+  </tr>
+  `;
+
+}).join('');
+
+
+
+$('#resultsGrandTotal')
+.textContent = money(calc.grand);
+
+
+if($('#resultsGrandNdp')){
+  $('#resultsGrandNdp')
+  .textContent = calc.grandNdp || 0;
+}
+
+
+if($('#resultsGrandTarget')){
+  $('#resultsGrandTarget')
+  .textContent = calc.grandTarget || 0;
+}
+
+  if($('annulDate').value===date)
+      renderAnulSummary();
+
+}
   window.__renderAnnul=renderAnnul;window.__renderResults=renderResults;
 
   function addEditor(wrapId,roles,values){const w=$(wrapId);w.innerHTML='';roles.forEach(([k,role])=>{const row=document.createElement('div');row.className='daily-col-editor';row.innerHTML=`<div class="role">${esc(role)}</div><input data-key="${k}" type="text" maxlength="40" value="${esc(values[k])}">`;w.appendChild(row)})}
@@ -996,6 +1253,24 @@
   $('dailyAssetView').addEventListener('change',()=>setTimeout(()=>{renderResults();if($('annulDate').value===$('dailyDate').value)renderAnnulSummary()},0));
   $('dailyAssetView').addEventListener('click',e=>{if(e.target.closest('#dailyResetBtn,.daily-del,.daily-dup,#dailyApplyBtn'))setTimeout(()=>{renderResults();renderAnnulSummary()},0)});
 
+  document.addEventListener('change',e=>{
+
+ if(e.target.classList.contains('target-input')){
+
+   const name = e.target.dataset.name;
+   const target = Number(e.target.value) || 0;
+
+   localStorage.setItem(
+     'TARGET_' + name,
+     target
+   );
+
+   renderResults();
+
+ }
+
+});
+  
   renderAnnul();renderResults();
   const initial=localStorage.getItem('daily-report-active-view');if(initial==='annul'){$('annulView').classList.remove('hidden')}if(initial==='results'){$('resultsView').classList.remove('hidden')}
 })();
