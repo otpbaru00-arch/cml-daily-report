@@ -993,6 +993,8 @@ function dailyRows(){
 
     const d = getDaily();
 
+    console.log("DATA DAILY:", d);
+
     let rows = [];
 
     Object.values(d.days || {}).forEach(day=>{
@@ -1002,6 +1004,8 @@ function dailyRows(){
         }
 
     });
+
+    console.log("TOTAL ROW DAILY:", rows);
 
     return rows;
 
