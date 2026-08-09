@@ -1023,8 +1023,14 @@ function annulRows(date){
     tr.querySelector('.annul-dup').addEventListener('click',()=>{const o=serializeAnnul(tr);o.id=uid();tr.after(annulRowTemplate(o));captureAnnul()});
     return tr;
   }
-  function serializeAnnul(tr){return {id:tr.dataset.id,name:upper(tr.querySelector('.a-name').value.trim()),member:upper(tr.querySelector('.a-member').value.trim()),note:upper(tr.querySelector('.a-note').value.trim())}}
-  function applyAnnulFilter(){const q=upper($('annulSearch')?.value||'').trim();[...$('annulRowsBody').children].forEach(tr=>{const r=serializeAnnul(tr),hit=!q||[r.name,r.member,r.note].some(v=>upper(v).includes(q));tr.classList.toggle('filtered-out',!hit)})}
+function serializeAnnul(tr){
+ return {
+   id:tr.dataset.id,
+   name:upper(tr.querySelector('.a-name').value.trim()),
+   member:upper(tr.querySelector('.a-member').value.trim()),
+   note:upper(tr.querySelector('.a-note').value.trim())
+ }
+}  function applyAnnulFilter(){const q=upper($('annulSearch')?.value||'').trim();[...$('annulRowsBody').children].forEach(tr=>{const r=serializeAnnul(tr),hit=!q||[r.name,r.member,r.note].some(v=>upper(v).includes(q));tr.classList.toggle('filtered-out',!hit)})}
   function sortAnnulRows(){const mode=$('annulSort').value,coll=new Intl.Collator('id-ID',{numeric:true,sensitivity:'base'}),[key,dir]=mode.split('-'),rows=[...$('annulRowsBody').children];rows.sort((a,b)=>{const A=serializeAnnul(a),B=serializeAnnul(b);return dir==='asc'?coll.compare(A[key]||'',B[key]||''):coll.compare(B[key]||'',A[key]||'')});rows.forEach(r=>$('annulRowsBody').appendChild(r));captureAnnul();applyAnnulFilter();toast('Urutan anulir diperbarui')}
   function handleAnnulPaste(e){const target=e.target.closest('input');if(!target||!target.closest('#annulTable'))return;const text=e.clipboardData?.getData('text/plain');if(text==null)return;const grid=text.replace(/\r/g,'').split('\n');if(grid.length&&grid[grid.length-1]==='')grid.pop();const cells=grid.map(r=>r.split('\t'));if(!cells.length)return;e.preventDefault();const controls=['a-name','a-member','a-note'],startRow=[...$('annulRowsBody').children].indexOf(target.closest('tr')),startCol=controls.findIndex(c=>target.classList.contains(c));if(startRow<0||startCol<0)return;const looksFullExcelRow=startCol===0&&cells.some(arr=>arr.length>=4)&&/^\d+$/.test(String(cells[0]?.[0]||'').trim());const normalizedCells=looksFullExcelRow?cells.map(arr=>[arr[1]||'',arr[2]||'',arr[3]||'ANULIR']):cells;const need=Math.min(500,startRow+normalizedCells.length);while($('annulRowsBody').children.length<need)$('annulRowsBody').appendChild(annulRowTemplate({note:'ANULIR'}));normalizedCells.forEach((arr,ri)=>{const tr=$('annulRowsBody').children[startRow+ri];arr.forEach((v,ci)=>{const key=controls[startCol+ci];if(!key)return;const el=tr.querySelector('.'+key);if(el)el.value=upper(v)})});$('annulRowCount').value=$('annulRowsBody').children.length;captureAnnul();applyAnnulFilter();toast('Data Excel ditempel & dirapikan')}
   function renumberAnnul(){[...$('annulRowsBody').children].forEach((tr,i)=>tr.children[0].textContent=i+1)}
