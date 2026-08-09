@@ -1012,10 +1012,9 @@ function dailyRows(){
 
 
 function annulRows(date){
-  return (annul.days?.[date] || [])
-    .filter(r=>r && (r.name || r.member));
-}
-  function annulRows(date){return (annul.days?.[date]||[]).filter(r=>r&&(r.name||r.member))}
+    return (annul.days?.[date] || [])
+        .filter(r=>r && (r.name || r.member));
+}.filter(r=>r&&(r.name||r.member))}
   function validAnnulSet(date){const set=new Set();annulRows(date).forEach(r=>{if(norm(r.name)&&norm(r.member))set.add(pairKey(r.name,r.member))});return set}
   function isAnnulled(row,set){return !!(norm(row.tele)&&norm(row.member)&&set.has(pairKey(row.tele,row.member)))}
 
@@ -1345,8 +1344,15 @@ if($('resultsGrandTarget')){
 
 });
   
-  renderAnnul();renderResults();
-  const initial=localStorage.getItem('daily-report-active-view');if(initial==='annul'){$('annulView').classList.remove('hidden')}if(initial==='results'){$('resultsView').classList.remove('hidden')}
+  renderAnnul();
+renderResults();
+
+const initial = localStorage.getItem('daily-report-active');
+
+if(initial==='annul'){
+   $('annulView').classList.remove('hidden');
+}
+
 })();
 </script>
 
