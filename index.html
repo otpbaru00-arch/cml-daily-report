@@ -1011,10 +1011,11 @@
     const date=currentAnnulDate(), rows=annul.days[date]||[];$('annulRowsBody').innerHTML='';(rows.length?rows:Array.from({length:10},()=>({note:'Anulir'}))).forEach(r=>$('annulRowsBody').appendChild(annulRowTemplate(r)));renumberAnnul();renderAnnulSummary();applyAnnulFilter();
   }
 
-  function calculateResults(date){
+  function calculateResults(){
 
-  const rows = dailyRows(date);
-  const annulSet = validAnnulSet(date);
+  const rows = dailyRows();
+
+  const annulSet = validAnnulSet();
 
   const groups = new Map();
 
@@ -1023,77 +1024,97 @@
 
   rows.forEach(r=>{
 
+
     const name = upper(
-      String(r.tele || r.name || 'TANPA NAMA')
-      .trim()
+      String(r.name || r.tele || 'TANPA NAMA').trim()
     );
 
 
     const member = upper(
-      String(r.member || '')
-      .trim()
+      String(r.member || '').trim()
     );
 
 
-    // cek transaksi yang sudah dianulir
-    const annulKey = `${name}|${member}`;
+    // cek apakah ada anulir
+    const key = `${name}|${member}`;
 
-    if(annulSet.has(annulKey)){
+    if(annulSet.has(key)){
       annulled++;
       return;
     }
 
 
+
     if(!groups.has(name)){
 
       groups.set(name,{
-    name:name,
-    ndp:0,
-    nominal:0,
-    target:Number(localStorage.getItem('TARGET_'+name)) || 100
-});
+
+        name:name,
+
+        ndp:0,
+
+        nominal:0,
+
+        target:
+        Number(
+          localStorage.getItem(
+            'TARGET_'+name
+          )
+        ) || 100
+
+      });
 
     }
+
 
 
     const item = groups.get(name);
 
 
-    // jumlah transaksi
-    item.ndp += 1;
+
+    // akumulasi NDP
+
+    item.ndp += Number(
+      r.ndp || 0
+    );
 
 
-    // total nominal
-    item.nominal += Number(r.nominal || 0);
+
+    // akumulasi nominal
+
+    item.nominal += Number(
+      r.nominal || 0
+    );
 
 
   });
 
 
 
-  const items=[...groups.values()].map(x=>({
+  const items =
+  [...groups.values()].map(x=>({
 
-    asset:
-      resultSettings.title || 'HASIL REPORT HARIAN',
+      asset:
+      activeAsset().name || 'UMUM',
 
 
-    name:
+      name:
       x.name,
 
 
-    ndp:
+      ndp:
       x.ndp,
 
 
-    nominal:
+      nominal:
       x.nominal,
 
 
-    target:
+      target:
       x.target,
 
 
-    status:
+      status:
       x.ndp >= x.target
       ? 'TARGET'
       : 'TIDAK TARGET'
@@ -1107,31 +1128,35 @@
     items,
 
     rowCount:
-      rows.length,
-
+    rows.length,
 
     annulled,
 
 
     grand:
-      items.reduce(
-        (a,x)=>a+x.nominal,
-        0
-      ),
+    items.reduce(
+      (a,x)=>a+x.nominal,
+      0
+    ),
 
 
     grandNdp:
-      items.reduce(
-        (a,x)=>a+x.ndp,
-        0
-      ),
+    items.reduce(
+      (a,x)=>a+x.ndp,
+      0
+    ),
 
 
     grandTarget:
-      items.reduce(
-        (a,x)=>a+x.target,
-        0
-      )
+    items.reduce(
+      (a,x)=>a+x.target,
+      0
+    )
+
+};
+
+
+}
 
   };
 
