@@ -983,7 +983,6 @@
   function toast(msg){const t=$('toast');if(!t)return;t.textContent=msg;t.classList.add('show');clearTimeout(window.__toast34);window.__toast34=setTimeout(()=>t.classList.remove('show'),1300)}
   function currentAnnulDate(){return $('annulDate').value||todayISO}
   function currentResultDate(){return $('resultsDate').value||todayISO}
-  function getDaily(){return loadJSON(DAILY_KEY,{days:{},categories:[]})}
   function getDaily(){
     return loadJSON(DAILY_KEY,{days:{},categories:{}});
 }
@@ -1071,15 +1070,17 @@ function captureAnnul(){
 
   const rows = dailyRows();
 
-  const annulSet = validAnnulSet();
-
+const annulSet = validAnnulSet(currentResultDate());
   const groups = new Map();
 
   let annulled = 0;
 
 
   rows.forEach(r=>{
+console.log("JUMLAH ROW:", rows.length);
+console.log("CONTOH DATA:", rows[0]);
 
+rows.forEach(r=>{
 
     const name = upper(
       String(r.name || r.tele || 'TANPA NAMA').trim()
