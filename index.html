@@ -1469,24 +1469,42 @@ if(initial === 'annul'){
 (() => {
   async function checkSession(){
     if(location.protocol==='file:'){
-      document.body.innerHTML='<div style="min-height:100vh;display:grid;place-items:center;font-family:Arial,sans-serif;background:#f4f7fb;padding:24px"><div style="max-width:560px;background:white;border:1px solid #dbe4ee;border-radius:16px;padding:26px;box-shadow:0 16px 40px rgba(20,40,60,.12)"><h2 style="margin-top:0">Akses dilindungi OTP</h2><p>Versi ini tidak dapat dibuka langsung sebagai file HTML. Jalankan melalui server Node.js agar verifikasi email dan OTP aktif.</p><p style="margin-bottom:0;color:#667085">Lihat README-AUTH.md pada paket proyek.</p></div></div>';
-      return;
-    }
+    document.body.innerHTML=`
+        <div style="min-height:100vh;display:grid;place-items:center;font-family:Arial,sans-serif;background:#f4f7fb">
+            File lokal tidak didukung
+        </div>
+    `;
+    return;
+}
     try{
       const r=await fetch('/api/auth/session',{credentials:'same-origin'});
       if(!r.ok){ location.replace('/login'); return; }
       const data=await r.json();
       if(!data.authenticated){ location.replace('/login'); return; }
       const el=document.getElementById('accountEmail');
-      if(el) el.textContent=String(data.user?.email||'').toUpperCase();
+     if(el){
+    el.textContent = String(
+        data.user && data.user.email ? data.user.email : ''
+    ).toUpperCase();
+}
     }catch(e){
       location.replace('/login');
     }
   }
-  document.getElementById('logoutBtn')?.addEventListener('click',async()=>{
-    try{ await fetch('/api/auth/logout',{method:'POST',credentials:'same-origin'}); }catch(_){}
-    location.replace('/login');
-  });
+const logoutBtn = document.getElementById('logoutBtn');
+
+if(logoutBtn){
+    logoutBtn.addEventListener('click', async()=>{
+        try{
+            await fetch('/api/auth/logout',{
+                method:'POST',
+                credentials:'same-origin'
+            });
+        }catch(_){}
+
+        location.replace('/login');
+    });
+}
   checkSession();
 })();
 </script>
