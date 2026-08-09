@@ -1241,10 +1241,10 @@ $('#resultsHeadStatus').textContent='KETERANGAN';
         oldCat=catSel.value;
 
   catSel.innerHTML =
-'<option value="">Semua aset / kategori</option>' +
-calc.items.map(x =>
-`<option value="${x.name}">${x.name}</option>`
-).join('');
+    '<option value="">Semua aset / kategori</option>' +
+    calc.items.map(function(x){
+        return '<option value="' + x.name + '">' + x.name + '</option>';
+    }).join('');
   
   let items = calc.items.filter(x=>{
   return !catSel.value || x.name === catSel.value;
