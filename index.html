@@ -1204,17 +1204,15 @@ rows.forEach(r=>{
     ),
 
 
-    grandTarget:
+        grandTarget:
     items.reduce(
-      (a,x)=>a+x.target,
-      0
+        (a,x)=>a+x.target,
+        0
     )
 
+};
 
-  };
-
-}
-  function renderResults(){
+function renderResults(){
 
   const date=currentResultDate(),
         calc=calculateResults(date),
