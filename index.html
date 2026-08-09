@@ -849,7 +849,7 @@
 
   monthSelect.value=Number.isInteger(state.ui?.month)?state.ui.month:now.getMonth();yearInput.value=state.ui?.year||now.getFullYear();renderActiveAsset();saveState(false);
 })();
-</script>
+
 
 <script>
 (() => {
@@ -951,7 +951,7 @@
   $('dailySettingsBtn').addEventListener('click',openSettings);$('closeDailySettings').addEventListener('click',closeSettings);$('cancelDailySettings').addEventListener('click',closeSettings);$('saveDailySettings').addEventListener('click',saveSettings);$('addDailyCategoryBtn').addEventListener('click',()=>addCategoryEditorRow(''));$('dailySettingsModal').addEventListener('click',e=>{if(e.target===$('dailySettingsModal'))closeSettings()});
   const initialView=localStorage.getItem('daily-report-active-view')||'new';switchView(['new','daily','annul','results'].includes(initialView)?initialView:'new');
 })();
-</script>
+
 
 <script>
 (() => {
@@ -1385,7 +1385,7 @@ if($('resultsGrandTarget')){
   });
   checkSession();
 })();
-</script>
+
 
 </body>
 </html>
