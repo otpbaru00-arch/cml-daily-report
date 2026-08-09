@@ -1028,8 +1028,25 @@ function annulRows(date){
   function sortAnnulRows(){const mode=$('annulSort').value,coll=new Intl.Collator('id-ID',{numeric:true,sensitivity:'base'}),[key,dir]=mode.split('-'),rows=[...$('annulRowsBody').children];rows.sort((a,b)=>{const A=serializeAnnul(a),B=serializeAnnul(b);return dir==='asc'?coll.compare(A[key]||'',B[key]||''):coll.compare(B[key]||'',A[key]||'')});rows.forEach(r=>$('annulRowsBody').appendChild(r));captureAnnul();applyAnnulFilter();toast('Urutan anulir diperbarui')}
   function handleAnnulPaste(e){const target=e.target.closest('input');if(!target||!target.closest('#annulTable'))return;const text=e.clipboardData?.getData('text/plain');if(text==null)return;const grid=text.replace(/\r/g,'').split('\n');if(grid.length&&grid[grid.length-1]==='')grid.pop();const cells=grid.map(r=>r.split('\t'));if(!cells.length)return;e.preventDefault();const controls=['a-name','a-member','a-note'],startRow=[...$('annulRowsBody').children].indexOf(target.closest('tr')),startCol=controls.findIndex(c=>target.classList.contains(c));if(startRow<0||startCol<0)return;const looksFullExcelRow=startCol===0&&cells.some(arr=>arr.length>=4)&&/^\d+$/.test(String(cells[0]?.[0]||'').trim());const normalizedCells=looksFullExcelRow?cells.map(arr=>[arr[1]||'',arr[2]||'',arr[3]||'ANULIR']):cells;const need=Math.min(500,startRow+normalizedCells.length);while($('annulRowsBody').children.length<need)$('annulRowsBody').appendChild(annulRowTemplate({note:'ANULIR'}));normalizedCells.forEach((arr,ri)=>{const tr=$('annulRowsBody').children[startRow+ri];arr.forEach((v,ci)=>{const key=controls[startCol+ci];if(!key)return;const el=tr.querySelector('.'+key);if(el)el.value=upper(v)})});$('annulRowCount').value=$('annulRowsBody').children.length;captureAnnul();applyAnnulFilter();toast('Data Excel ditempel & dirapikan')}
   function renumberAnnul(){[...$('annulRowsBody').children].forEach((tr,i)=>tr.children[0].textContent=i+1)}
-  function captureAnnul(){const date=currentAnnulDate();annul.days[date]=[...$('annulRowsBody').children].map(serializeAnnul);saveAnnul();renumberAnnul();renderAnnulSummary();if($('resultsDate').value===date)renderResults()}
-  function applyAnnulRows(){let count=Math.max(1,Math.min(500,Number($('annulRowCount').value)||1));const b=$('annulRowsBody');while(b.children.length<count)b.appendChild(annulRowTemplate({note:'Anulir'}));while(b.children.length>count)b.lastElementChild.remove();captureAnnul();toast('Jumlah baris anulir diterapkan')}
+function captureAnnul(){
+
+    const date=currentAnnulDate();
+
+    annul.days[date]=[
+        ...$('#annulRowsBody').children
+    ].map(serializeAnnul);
+
+    saveAnnul();
+
+    renumberAnnul();
+
+    renderAnnulSummary();
+
+    if($('#resultsDate').value===date){
+        renderResults();
+    }
+
+}  function applyAnnulRows(){let count=Math.max(1,Math.min(500,Number($('annulRowCount').value)||1));const b=$('annulRowsBody');while(b.children.length<count)b.appendChild(annulRowTemplate({note:'Anulir'}));while(b.children.length>count)b.lastElementChild.remove();captureAnnul();toast('Jumlah baris anulir diterapkan')}
   function renderAnnulSummary(){const date=currentAnnulDate(), rows=annulRows(date), valid=rows.filter(r=>norm(r.name)&&norm(r.member)), set=validAnnulSet(date), matched=dailyRows(date).filter(r=>isAnnulled(r,set));$('annulCountSummary').textContent=rows.length;$('annulValidSummary').textContent=valid.length;$('annulMatchedSummary').textContent=matched.length;$('annulDateSummary').textContent=fmtDate(date)}
   function renderAnnul(){
     $('annulTitleHead').textContent=annul.title;$('annulPageTitle').textContent=annul.title;$('navAnnulLabel').textContent=annul.menuName;
