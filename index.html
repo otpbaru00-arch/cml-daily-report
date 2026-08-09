@@ -1455,13 +1455,35 @@ if(initial === 'annul'){
 
 (() => {
   // Menjaga tampilan data tabel konsisten walaupun sumber copy/paste berasal dari Excel.
-  const upper=v=>String(v??'').toLocaleUpperCase('id-ID');
-  document.addEventListener('input',e=>{
-    const el=e.target;
-    if(el instanceof HTMLInputElement && el.type==='text' && el.closest('table.sheet')){
-      const pos=el.selectionStart; const v=upper(el.value); if(el.value!==v){el.value=v;try{el.setSelectionRange(pos,pos)}catch(_){}}
+  const upper = v => String(v === null || v === undefined ? '' : v)
+    .toLocaleUpperCase('id-ID');
+  document.addEventListener('input', function(e){
+
+    const el = e.target;
+
+    if(
+        el instanceof HTMLInputElement &&
+        el.type === 'text' &&
+        el.closest('table.sheet')
+    ){
+
+        const pos = el.selectionStart;
+        const v = upper(el.value);
+
+        if(el.value !== v){
+
+            el.value = v;
+
+            try{
+                el.setSelectionRange(pos,pos);
+            }
+            catch(err){
+            }
+
+        }
     }
-  },true);
+
+}, true);
 })();
 </script>
 
