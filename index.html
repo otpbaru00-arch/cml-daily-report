@@ -984,7 +984,33 @@
   function currentAnnulDate(){return $('annulDate').value||todayISO}
   function currentResultDate(){return $('resultsDate').value||todayISO}
   function getDaily(){return loadJSON(DAILY_KEY,{days:{},categories:[]})}
-  function dailyRows(date){const d=getDaily();return (d.days?.[date]||[]).filter(r=>r&&(r.tele||r.member||Number(r.nominal)||r.note))}
+  function getDaily(){
+    return loadJSON(DAILY_KEY,{days:{},categories:{}});
+}
+
+
+function dailyRows(){
+
+    const d = getDaily();
+
+    let rows = [];
+
+    Object.values(d.days || {}).forEach(day=>{
+
+        if(Array.isArray(day)){
+            rows.push(...day);
+        }
+
+    });
+
+    return rows;
+
+}
+
+
+function annulRows(date){
+    ...
+}.filter(r=>r&&(r.tele||r.member||Number(r.nominal)||r.note))}
   function annulRows(date){return (annul.days?.[date]||[]).filter(r=>r&&(r.name||r.member))}
   function validAnnulSet(date){const set=new Set();annulRows(date).forEach(r=>{if(norm(r.name)&&norm(r.member))set.add(pairKey(r.name,r.member))});return set}
   function isAnnulled(row,set){return !!(norm(row.tele)&&norm(row.member)&&set.has(pairKey(row.tele,row.member)))}
