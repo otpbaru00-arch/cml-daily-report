@@ -1393,11 +1393,13 @@ if($('resultsGrandTarget')){
   .textContent = calc.grandTarget || 0;
 }
 
-  if($('annulDate').value===date)
-      renderAnulSummary();
-
+  if($('annulDate').value===date){
+    renderAnnulSummary();
 }
-  window.__renderAnnul=renderAnnul;window.__renderResults=renderResults;
+
+
+window.__renderAnnul=renderAnnul;
+window.__renderResults=renderResults;
 
   function addEditor(wrapId,roles,values){const w=$(wrapId);w.innerHTML='';roles.forEach(([k,role])=>{const row=document.createElement('div');row.className='daily-col-editor';row.innerHTML=`<div class="role">${esc(role)}</div><input data-key="${k}" type="text" maxlength="40" value="${esc(values[k])}">`;w.appendChild(row)})}
   function openAnnulSettings(){$('setAnnulTitle').value=annul.title;$('setAnnulMenuName').value=annul.menuName;addEditor('annulColumnEditor',annulRoles,annul.columns);$('annulSettingsModal').classList.add('show')}
