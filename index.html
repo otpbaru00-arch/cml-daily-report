@@ -1054,7 +1054,7 @@ function captureAnnul(){
 
     renderAnnulSummary();
 
-    if($('#resultsDate').value===date){
+    if($('resultsDate').value===date){
         renderResults();
     }
 
@@ -1221,21 +1221,15 @@ rows.forEach(r=>{
         sort=$('resultsSort').value||'name';
 
   $('resultsTitleHead').textContent=resultSettings.title;
-  $('resultsPageTitle').textContent=resultSettings.title;
+$('resultsPageTitle').textContent=resultSettings.title;
 
-  $('#resultsHeadNo').textContent='NO';
-
-$('#resultsHeadAsset').textContent='ASET';
-
-$('#resultsHeadName').textContent='NAMA TELE';
-
-$('#resultsHeadNdp').textContent='NDP';
-
-$('#resultsHeadNominal').textContent='NOMINAL';
-
-$('#resultsHeadTarget').textContent='TARGET NDP';
-
-$('#resultsHeadStatus').textContent='KETERANGAN';
+$('resultsHeadNo').textContent='NO';
+$('resultsHeadAsset').textContent='ASET';
+$('resultsHeadName').textContent='NAMA TELE';
+$('resultsHeadNdp').textContent='NDP';
+$('resultsHeadNominal').textContent='NOMINAL';
+$('resultsHeadTarget').textContent='TARGET NDP';
+$('resultsHeadStatus').textContent='KETERANGAN';
 
   const catSel=$('resultsCategoryFilter'),
         oldCat=catSel.value;
@@ -1251,7 +1245,7 @@ $('#resultsHeadStatus').textContent='KETERANGAN';
 });
 
 
-$('#resultsBody').innerHTML = items.map((x,i)=>{
+$('resultsBody').innerHTML = items.map((x,i)=>{
 
   const status =
     Number(x.ndp) >= Number(x.target)
@@ -1292,18 +1286,18 @@ $('#resultsBody').innerHTML = items.map((x,i)=>{
 
 
 
-$('#resultsGrandTotal')
+$('resultsGrandTotal')
 .textContent = money(calc.grand);
 
 
-if($('#resultsGrandNdp')){
-  $('#resultsGrandNdp')
+if($('resultsGrandNdp')){
+  $('resultsGrandNdp')
   .textContent = calc.grandNdp || 0;
 }
 
 
-if($('#resultsGrandTarget')){
-  $('#resultsGrandTarget')
+if($('resultsGrandTarget')){
+  $('resultsGrandTarget')
   .textContent = calc.grandTarget || 0;
 }
 
